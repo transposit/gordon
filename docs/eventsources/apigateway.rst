@@ -435,6 +435,19 @@ Full Example
                           parameters:
                             method.response.header.color: color
 
+                /redirect:
+                    methods: GET
+                    responses:
+                        - code: "302"
+                          parameters: method.response.header.Location: True
+                    integration:
+                        lambda: helloworld.redirection
+                        responses:
+                            - pattern: "^helloworld.RedirectError.*"
+                              code: "302"
+                              parameters:
+                                  method.response.header.Location: integration.response.body.cause.errorMessage
+
                 /hi/complex/:
                     methods:
                         GET:
