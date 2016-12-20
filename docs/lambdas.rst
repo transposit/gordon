@@ -600,7 +600,10 @@ access the vpc. If it is ``False``, you'll need to do this by yourself.
             {
                 "Effect": "Allow",
                 "Action": [
-                    "ec2:CreateNetworkInterface"
+                    "ec2:CreateNetworkInterface",
+                    "ec2:DeleteNetworkInterface",
+                    "ec2:DescribeNetworkInterfaces"
+
                 ],
                 "Resource": [
                     "*"
