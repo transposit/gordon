@@ -246,10 +246,10 @@ Example:
                     integration:
                         lambda: helloworld.sayhi
                         responses:
-                            - code: "404"
+                            - pattern: ""
+                              code: "404"
                     responses:
-                        - pattern: ""
-                          code: "404"
+                        - code: "404"
 
 
 Resource Parameters
@@ -300,7 +300,7 @@ Integration Type
 Name                         ``type``
 Required                     No
 Default                      AWS
-Valid Values                 ``AWS``, ``MOCK``, ``HTTP``
+Valid Values                 ``AWS``, ``AWS_PROXY``, ``MOCK``, ``HTTP``
 Description                  Type of the integration
 ===========================  ============================================================================================================
 
@@ -349,7 +349,15 @@ Required                     No
 Valid Values                 ``list``
 Description                  The response that API Gateway provides after a method's back end completes processing a request.
                              API Gateway intercepts the integration's response so that you can control how API Gateway surfaces back-end
-                             responses.
+                             responses. Each response item can conatain the following keys: ``pattern``: a regular expression that
+                             specifies which error strings or status codes from the back end map to the integration response; ``code``:
+                             the status code that API Gateway uses to map the integration response to a MethodResponse status code;
+                             ``template``: the templates used to transform the integration response body; ``parameters``: the response
+                             parameters from the back-end response that API Gateway sends to the method response. Parameters can be used
+                             to set outbound CORS headers: ``method.response.header.Access-Control-Allow-Origin: "'*'"`` or to map custom
+                             dynamic headers: ``method.response.header.Custom: "integration.response.body.customValue"``
+
+
 ===========================  ============================================================================================================
 
 Example:
@@ -366,8 +374,6 @@ Example:
               responses:
                 - pattern: ""
                   code: "404"
-                  models:
-                    application/xml: Empty
                   template:
                     application/json: |
                       #set($inputRoot = $input.path('$'))
@@ -400,10 +406,10 @@ Full Example
                     integration:
                         lambda: helloworld.sayhi
                         responses:
-                            - code: "404"
+                            - pattern: ""
+                              code: "404"
                     responses:
-                        - pattern: ""
-                          code: "404"
+                        - code: "404"
 
                 /hi/none:
                     method: GET
@@ -419,6 +425,12 @@ Full Example
                     integration:
                         type: MOCK
 
+                /{integration+}:
+                    methods: POST
+                    integration:
+                        lambda: helloworld.sayho
+                        type: AWS_PROXY
+
                 /parameters:
                     methods: GET
                     parameters:
@@ -433,7 +445,25 @@ Full Example
                     responses:
                         - code: "200"
                           parameters:
-                            method.response.header.color: color
+                              method.response.header.color: color
+
+                /cors:
+                    methods: GET
+                    integration:
+                        lambda: helloworld.hellopy
+                        responses:
+                            - pattern: ""
+                              code: "200"
+                              parameters:
+                                  method.response.header.Access-Control-Allow-Origin: "'*'"
+                                  method.response.header.Access-Control-Allow-Methods: "'*'"
+                                  method.response.header.Access-Control-Request-Method: "'GET'"
+                    responses:
+                        - code: "200"
+                          parameters:
+                              method.response.header.Access-Control-Allow-Origin: true
+                              method.response.header.Access-Control-Allow-Methods: true
+                              method.response.header.Access-Control-Request-Method: true
 
                 /redirect:
                     methods: GET
